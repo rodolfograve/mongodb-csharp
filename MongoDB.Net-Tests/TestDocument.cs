@@ -218,6 +218,19 @@ namespace MongoDB.Driver
             Assert.AreEqual(@"{ ""foo"": [ { ""a"": 1 }, { ""b"": 2 }, { ""c"": 3 } ] }", doc.ToString());
         }
 
+        [Test]
+        public void TestBuildFromObject()
+        {
+            object spec = new { p1 = 1, p2 = "test", p3 = MongoDBNull.Value};
+            Document doc = Document.BuildFromObject(spec);
+            Assert.IsNotNull(doc["p1"]);
+            Assert.AreEqual(1, doc["p1"]);
+            Assert.IsNotNull(doc["p2"]);
+            Assert.AreEqual("test", doc["p2"]);
+            Assert.IsNotNull(doc["p3"]);
+            Assert.AreEqual(MongoDBNull.Value, doc["p3"]);
+        }
+
         private void AreEqual(Document d1, Document d2) {
             if (!d1.Equals(d2)) {
                 Assert.Fail(string.Format("Documents don't match\r\nExpected: {0}\r\nActual:   {1}", d1, d2));

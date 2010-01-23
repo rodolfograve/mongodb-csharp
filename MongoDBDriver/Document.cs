@@ -189,5 +189,23 @@ namespace MongoDB.Driver {
             }
             return;
         }
+
+        public static Document BuildFromObject(object spec)
+        {
+            Document result = new Document();
+            if (spec != null)
+            {
+                foreach (var property in spec.GetType().GetProperties())
+                {
+                    if (property.CanRead)
+                    {
+                        object value = property.GetValue(spec, null);
+                        result.Add(property.Name, value ?? MongoDBNull.Value);
+                    }
+                }
+            }
+            return result;
+        }
+
     }
 }
