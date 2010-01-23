@@ -4,6 +4,7 @@ using System.IO;
 
 using MongoDB.Driver.Bson;
 using MongoDB.Driver.IO;
+using System.Reflection;
 
 namespace MongoDB.Driver
 {
@@ -59,6 +60,16 @@ namespace MongoDB.Driver
             //FIXME Decide if this should throw a not found exception instead of returning null.
             return null; //this.Find(spec, -1, 0, null)[0];
         }
+
+        /// <summary>
+        /// Same as FindOne but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public Document FindOne(object spec)
+        {
+            return this.FindOne(Document.BuildFromObject(spec));
+        }
         
         public ICursor FindAll() {
             Document spec = new Document();
@@ -74,18 +85,51 @@ namespace MongoDB.Driver
         public ICursor Find(Document spec) {
             return this.Find(spec, 0, 0, null);
         }
-        
-        public ICursor Find(Document spec, int limit, int skip) {
+
+        /// <summary>
+        /// Same as Find but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public ICursor Find(object spec)
+        {
+            return Find(Document.BuildFromObject(spec));
+        }
+
+        public ICursor Find(Document spec, int limit, int skip)
+        {
             return this.Find(spec, limit, skip, null);
         }
-        
-        public ICursor Find(Document spec, int limit, int skip, Document fields) {
+
+        /// <summary>
+        /// Same as Find but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public ICursor Find(object spec, int limit, int skip)
+        {
+            return this.Find(Document.BuildFromObject(spec), limit, skip, null);
+        }
+
+        public ICursor Find(Document spec, int limit, int skip, Document fields)
+        {
             if(spec == null) spec = new Document();
             Cursor cur = new Cursor(connection, this.FullName, spec, limit, skip, fields);
             return cur;
         }
-        
-        public long Count(){
+
+        /// <summary>
+        /// Same as Find but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public ICursor Find(object spec, int limit, int skip, object fields)
+        {
+            return this.Find(spec == null ? null : Document.BuildFromObject(spec), limit, skip, Document.BuildFromObject(fields));
+        }
+
+        public long Count()
+        {
             return this.Count(new Document());
         }
         
@@ -101,10 +145,25 @@ namespace MongoDB.Driver
             }
             
         }
-        
+
+        public long Count(object spec)
+        {
+            return this.Count(Document.BuildFromObject(spec));
+        }
+
         public void Insert(Document doc){
             Document[] docs = new Document[]{doc,};
             this.Insert(docs);
+        }
+
+        /// <summary>
+        /// Same as Insert but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public void Insert(object doc)
+        {
+            this.Insert(Document.BuildFromObject(doc));
         }
         
         public void Insert(IEnumerable<Document> docs){
@@ -125,7 +184,7 @@ namespace MongoDB.Driver
                 throw new MongoCommException("Could not insert document, communication failure", this.connection,ioe);
             }   
         }
-        
+
         public void Delete(Document selector){
             DeleteMessage dm = new DeleteMessage();
             dm.FullCollectionName = this.FullName;
@@ -135,6 +194,16 @@ namespace MongoDB.Driver
             }catch(IOException ioe){
                 throw new MongoCommException("Could not delete document, communication failure", this.connection,ioe);
             }
+        }
+
+        /// <summary>
+        /// Same as Delete but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public void Delete(object selector)
+        {
+            this.Delete(Document.BuildFromObject(selector));
         }
         
         public void Update(Document doc){
@@ -151,11 +220,31 @@ namespace MongoDB.Driver
             }
             this.Update(doc, selector, upsert);
         }
+
+        /// <summary>
+        /// Same as Update but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public void Update(object doc)
+        {
+            this.Update(Document.BuildFromObject(doc));
+        }
         
         public void Update(Document doc, Document selector){
             this.Update(doc, selector, 0);
         }
-        
+
+        /// <summary>
+        /// Same as Update but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public void Update(object doc, object selector)
+        {
+            Update(Document.BuildFromObject(doc), Document.BuildFromObject(selector));
+        }
+
         public void Update(Document doc, Document selector, UpdateFlags flags){
             UpdateMessage um = new UpdateMessage();
             um.FullCollectionName = this.FullName;
@@ -169,10 +258,30 @@ namespace MongoDB.Driver
             }           
             
         }
+
+        /// <summary>
+        /// Same as Update but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public void Update(object doc, object selector, UpdateFlags flags)
+        {
+            this.Update(Document.BuildFromObject(doc), Document.BuildFromObject(selector), flags);
+        }
         
         public void Update(Document doc, Document selector, int flags){
             //TODO Update the interface and make a breaking change.
             this.Update(doc,selector,(UpdateFlags)flags);
+        }
+
+        /// <summary>
+        /// Same as Update but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public void Update(object doc, object selector, int flags)
+        {
+            this.Update(Document.BuildFromObject(doc), Document.BuildFromObject(selector), flags);
         }
         
         /// <summary>
@@ -196,5 +305,16 @@ namespace MongoDB.Driver
             }
             this.Update(doc, selector, UpdateFlags.MultiUpdate);
         }
+
+        /// <summary>
+        /// Same as UpdateAll but builds the document specification from the <paramref name="spec"/> object.
+        /// You can use anonymous types to build the documents: <example>new { prop1 = 1, prop2 = "test" })</example>
+        /// which resembles the MongoDB's native JavaScript syntax.
+        /// </summary>
+        public void UpdateAll(object doc, object selector)
+        {
+            this.UpdateAll(Document.BuildFromObject(doc), Document.BuildFromObject(selector));
+        }
+
     }
 }

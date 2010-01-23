@@ -17,7 +17,15 @@ namespace MongoDB.Driver
             Assert.IsNotNull(result);
             Assert.AreEqual(4, result["x"]);
             Assert.AreEqual(10, result["j"]);
-            
+        }
+
+        [Test]
+        public void TestFindOne_object()
+        {
+            Document result = db["tests"]["reads"].FindOne(new { j = 10 });
+            Assert.IsNotNull(result);
+            Assert.AreEqual(4, result["x"]);
+            Assert.AreEqual(10, result["j"]);
         }
         
         [Test]
